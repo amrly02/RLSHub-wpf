@@ -1,0 +1,58 @@
+<UserControl x:Class="RLSHub.Wpf.Views.CarSwapPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:RLSHub.Wpf.Models"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
+        <StackPanel>
+            <Border Style="{StaticResource PillCardStyle}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="What is CarSwap?" Style="{StaticResource CardTitleTextStyle}"/>
+                    <TextBlock Text="CarSwap is a community marketplace for buying and selling vehicles in the Career Overhaul. Listings here are synced with the in-game marketplace. Use Run bridge to sync listings into the game; Update bridge refreshes the bridge executable from the app." Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Border>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Marketplace listings" Style="{StaticResource HeroSubtitleTextStyle}" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Update bridge" Style="{StaticResource GhostButtonStyle}" Click="UpdateBridge_Click"/>
+                    <Button Content="Run bridge" Click="RunBridge_Click" Margin="10,0,0,0"/>
+                    <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click" Margin="10,0,0,0"/>
+                </StackPanel>
+            </Grid>
+            <TextBlock x:Name="StatusText" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,16"/>
+            <ItemsControl x:Name="ListingsItems">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type models:CarSwapListing}">
+                        <Border Style="{StaticResource TileCardStyle}" Width="320" MinHeight="140" Margin="0,0,12,12">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" Style="{StaticResource CardTitleTextStyle}"/>
+                                <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleTextStyle}" MaxHeight="36" TextTrimming="CharacterEllipsis" Margin="0,6,0,0"/>
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding ModelDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
+                                        <TextBlock Text="{Binding SellerDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
+                                        <TextBlock Text="{Binding YearDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" Style="{StaticResource CardTitleTextStyle}" VerticalAlignment="Top"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

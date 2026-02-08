@@ -1,0 +1,19 @@
+namespace RLSHub.Wpf.Models
+{
+    public sealed class CarSwapListing
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string SellerName { get; set; } = string.Empty;
+        public int Price { get; set; }
+        public string VehicleModel { get; set; } = string.Empty;
+        public int? VehicleYear { get; set; }
+        public long Mileage { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string PriceDisplay { get; set; } = string.Empty;
+        public string SellerDisplay { get; set; } = string.Empty;
+        public string ModelDisplay { get; set; } = string.Empty;
+        public string YearDisplay { get; set; } = string.Empty;
+    }
+}

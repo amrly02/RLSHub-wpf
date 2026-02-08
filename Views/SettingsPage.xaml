@@ -4,16 +4,18 @@
              Background="Transparent">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
         <StackPanel>
-            <Border Style="{StaticResource TileCardStyle}">
+            <TextBlock Text="Settings" Style="{StaticResource SectionHeaderTextStyle}" Margin="0,0,0,6"/>
+            <TextBlock Text="Gameplay toggles and preferences." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,0,0,20"/>
+            <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,24">
                 <StackPanel>
-                    <TextBlock Text="Gameplay Toggles" Style="{StaticResource CardTitleTextStyle}" Margin="0,0,0,12"/>
-                    <CheckBox x:Name="MapDevToggle" Content="Map Dev Mode" Foreground="{StaticResource TextPrimaryBrush}" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,8"/>
-                    <TextBlock Text="Enable developer mode for map editing and testing." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,16"/>
+                    <TextBlock Text="Gameplay Toggles" Style="{StaticResource CardTitleTextStyle}" Margin="0,0,0,14"/>
+                    <CheckBox x:Name="MapDevToggle" Style="{StaticResource CheckBoxDarkStyle}" Content="Map Dev Mode" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,6"/>
+                    <TextBlock Text="Enable developer mode for map editing and testing." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,14"/>
 
-                    <CheckBox x:Name="NoPoliceToggle" Content="No Police Mode" Foreground="{StaticResource TextPrimaryBrush}" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,8"/>
-                    <TextBlock Text="Disable police enforcement and traffic pursuits." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,16"/>
+                    <CheckBox x:Name="NoPoliceToggle" Style="{StaticResource CheckBoxDarkStyle}" Content="No Police Mode" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,6"/>
+                    <TextBlock Text="Disable police enforcement and traffic pursuits." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,14"/>
 
-                    <CheckBox x:Name="NoParkedToggle" Content="No Parked Mode" Foreground="{StaticResource TextPrimaryBrush}" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,8"/>
+                    <CheckBox x:Name="NoParkedToggle" Style="{StaticResource CheckBoxDarkStyle}" Content="No Parked Mode" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,6"/>
                     <TextBlock Text="Remove parked vehicles for cleaner environments." Style="{StaticResource CardSubtitleTextStyle}"/>
                 </StackPanel>
             </Border>

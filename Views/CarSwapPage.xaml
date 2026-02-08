@@ -5,10 +5,12 @@
              Background="Transparent">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
         <StackPanel>
-            <Border Style="{StaticResource PillCardStyle}" Margin="0,0,0,16">
+            <TextBlock Text="CarSwap" Style="{StaticResource SectionHeaderTextStyle}" Margin="0,0,0,6"/>
+            <TextBlock Text="Community marketplace for buying and selling vehicles in the Career Overhaul." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,0,0,20"/>
+            <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="What is CarSwap?" Style="{StaticResource CardTitleTextStyle}"/>
-                    <TextBlock Text="CarSwap is a community marketplace for buying and selling vehicles in the Career Overhaul. Listings here are synced with the in-game marketplace. Use Run bridge to sync listings into the game; Update bridge refreshes the bridge executable from the app." Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <TextBlock Text="Listings here are synced with the in-game marketplace. Use Run bridge to sync listings into the game; Update bridge refreshes the bridge executable from the app." Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
                 </StackPanel>
             </Border>
             <Grid Margin="0,0,0,8">

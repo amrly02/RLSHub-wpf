@@ -1,8 +1,11 @@
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using RLSHub.Wpf.Views;
 
 namespace RLSHub.Wpf
@@ -21,7 +24,73 @@ namespace RLSHub.Wpf
             SetNavSelection(NavDashboard);
             UpdateHeader("dashboard");
             NavigateTo(new HomePage(), animate: false);
-            Loaded += (_, _) => Dispatcher.BeginInvoke((Action)(() => UpdateNavIndicator(NavDashboard, animate: false)), System.Windows.Threading.DispatcherPriority.Loaded);
+            Loaded += (_, _) =>
+            {
+                Dispatcher.BeginInvoke((Action)(() => UpdateNavIndicator(NavDashboard, animate: false)), System.Windows.Threading.DispatcherPriority.Loaded);
+                StartFallingLogosWithRandomPositions();
+            };
+        }
+
+        private static readonly Random _random = new Random();
+
+        private void StartFallingLogosWithRandomPositions()
+        {
+            if (FallingLogosCanvas?.Children == null) return;
+            const double fallTo = 850;
+            var logosPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Logos");
+
+            foreach (UIElement child in FallingLogosCanvas.Children)
+            {
+                if (child is not FrameworkElement viewbox) continue;
+
+                if (child is System.Windows.Controls.Image img && viewbox.Tag is string tag && tag.StartsWith("rls-logo-", StringComparison.OrdinalIgnoreCase))
+                {
+                    var sourcePath = Path.Combine(logosPath, tag + ".png");
+                    if (File.Exists(sourcePath))
+                    {
+                        try
+                        {
+                            img.Source = new BitmapImage(new Uri(sourcePath, UriKind.Absolute));
+                        }
+                        catch { /* ignore load errors */ }
+                    }
+                }
+
+                // Random starting height (0–700) so they don't all start in a line
+                double startTop = _random.Next(0, 701);
+                Canvas.SetTop(viewbox, startTop);
+
+                double durationSeconds = 26 + _random.Next(0, 12);
+                var firstFall = new DoubleAnimation(startTop, fallTo, TimeSpan.FromSeconds(durationSeconds));
+                Storyboard.SetTarget(firstFall, viewbox);
+                Storyboard.SetTargetProperty(firstFall, new System.Windows.PropertyPath("(Canvas.Top)"));
+
+                var sb = new Storyboard();
+                sb.Children.Add(firstFall);
+                sb.Completed += (_, _) => StartRepeatFall(viewbox, fallTo);
+                sb.Begin();
+            }
+        }
+
+        private void StartRepeatFall(FrameworkElement viewbox, double fallTo)
+        {
+            // Random reset height above view (-350 to -50) so they reappear at different heights
+            double resetTop = -50 - _random.Next(0, 301);
+            Canvas.SetTop(viewbox, resetTop);
+
+            // New random duration each loop so they stay out of sync
+            double durationSeconds = 24 + _random.Next(0, 16);
+            var repeatFall = new DoubleAnimation(resetTop, fallTo, TimeSpan.FromSeconds(durationSeconds))
+            {
+                // Stagger start (0–18 sec) so they don't all drop from top at once
+                BeginTime = TimeSpan.FromSeconds(_random.Next(0, 19))
+            };
+            Storyboard.SetTarget(repeatFall, viewbox);
+            Storyboard.SetTargetProperty(repeatFall, new System.Windows.PropertyPath("(Canvas.Top)"));
+            var repeatSb = new Storyboard();
+            repeatSb.Children.Add(repeatFall);
+            repeatSb.Completed += (_, _) => StartRepeatFall(viewbox, fallTo);
+            repeatSb.Begin();
         }
 
         private void Nav_Click(object sender, RoutedEventArgs e)

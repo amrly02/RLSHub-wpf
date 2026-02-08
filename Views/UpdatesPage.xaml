@@ -4,20 +4,22 @@
              Background="Transparent">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
         <StackPanel>
-            <Border Style="{StaticResource TileCardStyle}" Margin="0,0,0,16">
+            <TextBlock Text="Updates" Style="{StaticResource SectionHeaderTextStyle}" Margin="0,0,0,6"/>
+            <TextBlock Text="Check your RLSHub and mod version, and get the latest release." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,0,0,20"/>
+            <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="RLSHub" Style="{StaticResource CardTitleTextStyle}"/>
-                    <TextBlock x:Name="CurrentVersionText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,10,0,0"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <TextBlock x:Name="CurrentVersionText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
                         <Button x:Name="CheckUpdatesButton" Content="Check updates" Click="CheckUpdatesButton_Click"/>
                         <Button x:Name="ViewPatchNotesButton" Content="View patch notes (GitHub)" Style="{StaticResource GhostButtonStyle}" Click="ViewPatchNotesButton_Click" Margin="12,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Border Background="{StaticResource SurfaceAltBrush}" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,0">
+            <Border Style="{StaticResource TileCardStyle}" Padding="24">
                 <StackPanel>
-                    <TextBlock Text="Updates" Style="{StaticResource CardTitleTextStyle}" Foreground="{StaticResource TextPrimaryBrush}"/>
-                    <TextBlock Text="Click Check updates to open the releases page or fetch the latest version." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,4,0,0"/>
+                    <TextBlock Text="About updates" Style="{StaticResource CardTitleTextStyle}"/>
+                    <TextBlock Text="Click Check updates to open the releases page or fetch the latest version." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,6,0,0"/>
                 </StackPanel>
             </Border>
         </StackPanel>

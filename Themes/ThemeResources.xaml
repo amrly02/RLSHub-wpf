@@ -3,26 +3,39 @@
     <!-- Shared easing for button animations -->
     <QuadraticEase x:Key="EaseOut" EasingMode="EaseOut"/>
     <QuadraticEase x:Key="EaseInOut" EasingMode="EaseInOut"/>
-    <!-- Same palette as WinUI 3 RLSHub -->
-    <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#0A0B12"/>
-    <SolidColorBrush x:Key="SurfaceBrush" Color="#121626"/>
-    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#171C2F"/>
-    <SolidColorBrush x:Key="SurfaceBorderBrush" Color="#232940"/>
-    <SolidColorBrush x:Key="AccentBrush" Color="#7C5CFF"/>
-    <SolidColorBrush x:Key="AccentSoftBrush" Color="#B9A8FF"/>
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F3F4FF"/>
-    <SolidColorBrush x:Key="TextMutedBrush" Color="#A8B0C7"/>
+    <!-- RLS STUDIOS palette: black, white, vibrant red; modern and smooth -->
+    <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#0A0A0A"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#121212"/>
+    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#1A1A1A"/>
+    <SolidColorBrush x:Key="SurfaceBorderBrush" Color="#2A2A2A"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="#DC2626"/>
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="#F87171"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#A3A3A3"/>
 
     <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="#3B2B6A" Offset="0"/>
-        <GradientStop Color="#6F4BFF" Offset="0.6"/>
-        <GradientStop Color="#22B7FF" Offset="1"/>
+        <GradientStop Color="#0D0D0D" Offset="0"/>
+        <GradientStop Color="#1C0A0A" Offset="0.4"/>
+        <GradientStop Color="#991B1B" Offset="1"/>
     </LinearGradientBrush>
     <!-- For controls on hero card: translucent so they sit on the gradient -->
-    <SolidColorBrush x:Key="HeroControlBackgroundBrush" Color="#28FFFFFF"/>
-    <SolidColorBrush x:Key="HeroControlBorderBrush" Color="#50FFFFFF"/>
-    <SolidColorBrush x:Key="HeroControlForegroundBrush" Color="#F0F4FF"/>
-    <SolidColorBrush x:Key="HeroControlMutedBrush" Color="#C0C8E0"/>
+    <SolidColorBrush x:Key="HeroControlBackgroundBrush" Color="#22FFFFFF"/>
+    <SolidColorBrush x:Key="HeroControlBorderBrush" Color="#45FFFFFF"/>
+    <SolidColorBrush x:Key="HeroControlForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="HeroControlMutedBrush" Color="#D4D4D4"/>
+
+    <!-- Transparent glossy card (glass-morphism) - subtle so it stays modern -->
+    <LinearGradientBrush x:Key="CardGlassBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#28FFFFFF" Offset="0"/>
+        <GradientStop Color="#14FFFFFF" Offset="0.4"/>
+        <GradientStop Color="#0CFFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="CardGlassBorderBrush" Color="#35FFFFFF"/>
+
+    <!-- Falling background logos (BeamNG-style) - red/white theme, low opacity -->
+    <SolidColorBrush x:Key="BgLogoAccentBrush" Color="#20DC2626"/>
+    <SolidColorBrush x:Key="BgLogoCyanBrush" Color="#18DC2626"/>
+    <SolidColorBrush x:Key="BgLogoPinkBrush" Color="#22FFFFFF"/>
 
     <!-- Primary button (accent) - hover scale up, click scale down -->
     <Style TargetType="Button">
@@ -284,7 +297,7 @@
         </Setter>
     </Style>
 
-    <!-- CheckBox for hero card (translucent, sits on gradient) -->
+    <!-- CheckBox for hero card (translucent, sits on gradient); checkmark draws in when checked -->
     <Style x:Key="CheckBoxHeroStyle" TargetType="CheckBox">
         <Setter Property="Foreground" Value="{StaticResource HeroControlForegroundBrush}"/>
         <Setter Property="FontSize" Value="12"/>
@@ -294,15 +307,34 @@
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Border x:Name="checkBorder" Width="18" Height="18" CornerRadius="5" BorderBrush="{StaticResource HeroControlBorderBrush}" BorderThickness="1" Background="{StaticResource HeroControlBackgroundBrush}" VerticalAlignment="Center" Margin="0,0,10,0">
-                            <Path x:Name="checkMark" Data="M 0,5 L 3,8 L 8,0" Stroke="{StaticResource HeroControlForegroundBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Visibility="Collapsed"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"/>
+                            <Path x:Name="checkMark" Data="M 0,5 L 3,8 L 8,0" Stroke="{StaticResource HeroControlForegroundBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  StrokeDashArray="14, 1000" StrokeDashOffset="20"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                </Path.RenderTransform>
+                            </Path>
                         </Border>
                         <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center"/>
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
                             <Setter TargetName="checkBorder" Property="Background" Value="#40FFFFFF"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="checkMark" Storyboard.TargetProperty="StrokeDashOffset" From="20" To="0" Duration="0:0:0.22" EasingFunction="{StaticResource EaseOut}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="checkMark" Storyboard.TargetProperty="StrokeDashOffset" From="0" To="20" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="checkBorder" Property="BorderBrush" Value="#80FFFFFF"/>
@@ -334,7 +366,7 @@
         </Setter>
     </Style>
 
-    <!-- Dark CheckBox with full template -->
+    <!-- Dark CheckBox with same draw animation as hero (for Settings etc.) -->
     <Style x:Key="CheckBoxDarkStyle" TargetType="CheckBox">
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="FontSize" Value="12"/>
@@ -343,16 +375,35 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border x:Name="checkBorder" Width="18" Height="18" CornerRadius="4" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" Background="{StaticResource SurfaceBrush}" VerticalAlignment="Center" Margin="0,0,8,0">
-                            <Path x:Name="checkMark" Data="M 0,5 L 3,8 L 8,0" Stroke="{StaticResource AccentBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Visibility="Collapsed"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"/>
+                        <Border x:Name="checkBorder" Width="18" Height="18" CornerRadius="5" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" Background="{StaticResource SurfaceBrush}" VerticalAlignment="Center" Margin="0,0,10,0">
+                            <Path x:Name="checkMark" Data="M 0,5 L 3,8 L 8,0" Stroke="{StaticResource AccentBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  StrokeDashArray="14, 1000" StrokeDashOffset="20"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                </Path.RenderTransform>
+                            </Path>
                         </Border>
                         <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center"/>
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
                             <Setter TargetName="checkBorder" Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="checkMark" Storyboard.TargetProperty="StrokeDashOffset" From="20" To="0" Duration="0:0:0.22" EasingFunction="{StaticResource EaseOut}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="checkMark" Storyboard.TargetProperty="StrokeDashOffset" From="0" To="20" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="checkBorder" Property="BorderBrush" Value="{StaticResource AccentSoftBrush}"/>
@@ -363,20 +414,20 @@
         </Setter>
     </Style>
 
-    <!-- Tile card (main content cards) -->
+    <!-- Tile card (transparent glossy glass look) -->
     <Style x:Key="TileCardStyle" TargetType="Border">
         <Setter Property="Padding" Value="18"/>
         <Setter Property="CornerRadius" Value="18"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{StaticResource SurfaceBorderBrush}"/>
-        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardGlassBorderBrush}"/>
+        <Setter Property="Background" Value="{StaticResource CardGlassBackgroundBrush}"/>
     </Style>
-    <!-- Pill card (smaller cards) -->
+    <!-- Pill card (same glossy, slightly smaller) -->
     <Style x:Key="PillCardStyle" TargetType="Border">
         <Setter Property="Padding" Value="14"/>
         <Setter Property="CornerRadius" Value="14"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{StaticResource SurfaceBorderBrush}"/>
-        <Setter Property="Background" Value="{StaticResource SurfaceAltBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardGlassBorderBrush}"/>
+        <Setter Property="Background" Value="{StaticResource CardGlassBackgroundBrush}"/>
     </Style>
 </ResourceDictionary>

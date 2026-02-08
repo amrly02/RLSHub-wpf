@@ -1,8 +1,10 @@
 # Upload published RLSHub.Wpf.exe to GitHub Releases (asks first).
 # Requires: GitHub CLI (gh) installed and logged in.
-# Run from repo root after: dotnet publish -c Release -p:PublishProfile=win-x64-singlefile -p:Platform=x64
+# Runs automatically after dotnet publish; or run .\upload-release.ps1 manually.
 
 $ErrorActionPreference = "Stop"
+# Skip prompt when run non-interactively (e.g. CI)
+if (-not [Environment]::UserInteractive) { exit 0 }
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $publishDir = Join-Path $scriptDir "bin\Release\net8.0-windows\win-x64\publish"
 $exePath = Join-Path $publishDir "RLSHub.Wpf.exe"

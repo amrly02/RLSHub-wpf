@@ -10,4 +10,8 @@
   <ItemGroup>
     <Content Include="Assets\**" CopyToOutputDirectory="PreserveNewest" Link="Assets\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
+  <!-- After publish, open upload script in a new window (so you can answer y/n and tag) -->
+  <Target Name="PromptUploadAfterPublish" AfterTargets="Publish">
+    <Exec Command="cmd /c start &quot;RLSHub - Upload to GitHub?&quot; powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)upload-release.ps1&quot;" IgnoreExitCode="true" />
+  </Target>
 </Project>

@@ -23,6 +23,10 @@
                         <Button x:Name="LaunchButton" Content="Launch BeamNG" Click="LaunchButton_Click"/>
                         <Button x:Name="OpenUserFolderButton" Content="Open UserFolder" Style="{StaticResource GhostButtonStyle}" Click="OpenUserFolderButton_Click" Margin="12,0,0,0"/>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="LastLaunchText" Style="{StaticResource CardSubtitleTextStyle}" Visibility="Collapsed" Margin="0,0,16,0"/>
+                        <TextBlock x:Name="BeamNgStatusText" Style="{StaticResource CardSubtitleTextStyle}" Text="BeamNG: Not running"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
         </StackPanel>

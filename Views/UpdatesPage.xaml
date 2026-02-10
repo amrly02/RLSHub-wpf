@@ -6,20 +6,31 @@
         <StackPanel>
             <TextBlock Text="Updates" Style="{StaticResource SectionHeaderTextStyle}" Margin="0,0,0,6"/>
             <TextBlock Text="Check your RLSHub and mod version, and get the latest release." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,0,0,20"/>
+            <!-- RLSHub app -->
             <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="RLSHub" Style="{StaticResource CardTitleTextStyle}"/>
-                    <TextBlock x:Name="CurrentVersionText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                        <Button x:Name="CheckUpdatesButton" Content="Check updates" Click="CheckUpdatesButton_Click"/>
-                        <Button x:Name="ViewPatchNotesButton" Content="View patch notes (GitHub)" Style="{StaticResource GhostButtonStyle}" Click="ViewPatchNotesButton_Click" Margin="12,0,0,0"/>
-                    </StackPanel>
+                    <TextBlock Text="RLSHub (this app)" Style="{StaticResource CardTitleTextStyle}"/>
+                    <TextBlock x:Name="AppVersionText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="AppUpdateStatusText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,4,0,0" Visibility="Collapsed"/>
                 </StackPanel>
             </Border>
+            <!-- Mod -->
+            <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="RLS Career Overhaul (mod)" Style="{StaticResource CardTitleTextStyle}"/>
+                    <TextBlock x:Name="ModVersionText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <TextBlock x:Name="ModUpdateStatusText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,4,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                <Button x:Name="CheckUpdatesButton" Content="Check updates" Click="CheckUpdatesButton_Click"/>
+                <Button x:Name="ViewAppReleasesButton" Content="RLSHub releases" Style="{StaticResource GhostButtonStyle}" Click="ViewAppReleasesButton_Click" Margin="12,0,0,0"/>
+                <Button x:Name="ViewModReleasesButton" Content="Mod releases" Style="{StaticResource GhostButtonStyle}" Click="ViewModReleasesButton_Click" Margin="12,0,0,0"/>
+            </StackPanel>
             <Border Style="{StaticResource TileCardStyle}" Padding="24">
                 <StackPanel>
-                    <TextBlock Text="About updates" Style="{StaticResource CardTitleTextStyle}"/>
-                    <TextBlock Text="Click Check updates to open the releases page or fetch the latest version." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,6,0,0"/>
+                    <CheckBox x:Name="NotifyWhenUpdateCheckBox" Style="{StaticResource CheckBoxDarkStyle}" Content="Notify when app or mod update is available" Checked="NotifyCheck_Changed" Unchecked="NotifyCheck_Changed" Margin="0,0,0,6"/>
+                    <TextBlock Text="When enabled, the Updates tab will show a badge when a new version is available." Style="{StaticResource CardSubtitleTextStyle}"/>
                 </StackPanel>
             </Border>
         </StackPanel>

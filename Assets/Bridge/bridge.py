@@ -1,6 +1,13 @@
 import json
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import requests
+
+# Ensure stdout/stderr are unbuffered when redirected (e.g. by RLSHub) so output appears immediately
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(line_buffering=True)
 
 
 class BridgeHandler(BaseHTTPRequestHandler):
@@ -49,7 +56,9 @@ class BridgeHandler(BaseHTTPRequestHandler):
 
 def main():
     server = ThreadingHTTPServer(("127.0.0.1", 8766), BridgeHandler)
-    print("HTTP bridge running on http://127.0.0.1:8766/bridge")
+    print("HTTP bridge running on http://127.0.0.1:8766/bridge", flush=True)
+    sys.stdout.flush()
+    sys.stderr.flush()
     server.serve_forever()
 
 

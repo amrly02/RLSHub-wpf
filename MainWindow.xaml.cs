@@ -6,6 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using RLSHub.Wpf.Services;
 using RLSHub.Wpf.Views;
 
 namespace RLSHub.Wpf
@@ -28,7 +29,50 @@ namespace RLSHub.Wpf
             {
                 Dispatcher.BeginInvoke((Action)(() => UpdateNavIndicator(NavDashboard, animate: false)), System.Windows.Threading.DispatcherPriority.Loaded);
                 StartFallingLogosWithRandomPositions();
+                _ = CheckUpdatesForBadgeAsync();
+                if (new FirstRunService().IsFirstRun())
+                {
+                    var firstRun = new FirstRunWindow { Owner = this };
+                    firstRun.ShowDialog();
+                }
             };
+            Closed += (_, _) => BridgeScriptService.KillCurrentBridge();
+        }
+
+        private async System.Threading.Tasks.Task CheckUpdatesForBadgeAsync()
+        {
+            try
+            {
+                var prefs = new DashboardPreferencesStore().Load();
+                if (!prefs.NotifyWhenUpdateAvailable) return;
+
+                var appService = new UpdateCheckService(UpdateCheckService.AppRepo.Owner, UpdateCheckService.AppRepo.Repo);
+                var modService = new UpdateCheckService("RLS-Modding", "rls_career_overhaul");
+                var appCurrent = UpdateCheckService.GetCurrentAppVersion();
+                var modCurrent = UpdateCheckService.GetInstalledModVersion().Version ?? new Version(0, 0, 0, 0);
+
+                var appTask = appService.FetchLatestReleaseAsync();
+                var modTask = modService.FetchLatestReleaseAsync();
+
+                var appUpdate = false;
+                var modUpdate = false;
+                try
+                {
+                    var (tag, _) = await appTask.ConfigureAwait(false);
+                    appUpdate = UpdateCheckService.IsUpdateAvailable(appCurrent, tag);
+                }
+                catch { /* ignore */ }
+                try
+                {
+                    var (tag, _) = await modTask.ConfigureAwait(false);
+                    modUpdate = UpdateCheckService.IsUpdateAvailable(modCurrent, tag);
+                }
+                catch { /* ignore */ }
+
+                if (appUpdate || modUpdate)
+                    Dispatcher.Invoke(() => UpdatesBadge.Visibility = Visibility.Visible);
+            }
+            catch { /* ignore */ }
         }
 
         private static readonly Random _random = new Random();

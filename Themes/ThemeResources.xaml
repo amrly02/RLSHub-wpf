@@ -12,6 +12,8 @@
     <SolidColorBrush x:Key="AccentSoftBrush" Color="#F87171"/>
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="TextMutedBrush" Color="#A3A3A3"/>
+    <SolidColorBrush x:Key="BridgeRunningBrush" Color="#22C55E"/>
+    <SolidColorBrush x:Key="BridgeStoppedBrush" Color="#DC2626"/>
 
     <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#0D0D0D" Offset="0"/>
@@ -292,6 +294,27 @@
                             </Border>
                         </Popup>
                     </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- TextBox for hero/filter bar (matches ComboBoxHeroStyle height 36) -->
+    <Style x:Key="TextBoxHeroStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource HeroControlBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource HeroControlForegroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource HeroControlBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="CaretBrush" Value="{StaticResource HeroControlForegroundBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

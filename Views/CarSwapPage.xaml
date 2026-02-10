@@ -13,6 +13,22 @@
                     <TextBlock Text="Listings here are synced with the in-game marketplace. Use Run bridge to sync listings into the game; Update bridge refreshes the bridge executable from the app." Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
                 </StackPanel>
             </Border>
+            <!-- Bridge status: red when stopped, green when running; expandable to show output -->
+            <Border Style="{StaticResource TileCardStyle}" Padding="12,10" Margin="0,0,0,8">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="BridgeExpandButton" Grid.Column="0" Content="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                Style="{StaticResource GhostButtonStyle}" Padding="4,0" Margin="0,0,6,0" VerticalAlignment="Center"
+                                Click="BridgeExpandButton_Click" Visibility="Collapsed" ToolTip="Show bridge output"/>
+                        <TextBlock x:Name="BridgeStatusText" Grid.Column="1" Text="Bridge: not running" TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" Foreground="{StaticResource BridgeStoppedBrush}"/>
+                    </Grid>
+                    <TextBlock x:Name="BridgeOutputText" Text="" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" FontSize="12" MaxHeight="80" Margin="24,6,0,0" Visibility="Collapsed"/>
+                </StackPanel>
+            </Border>
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -21,11 +37,37 @@
                 <TextBlock Text="Marketplace listings" Style="{StaticResource HeroSubtitleTextStyle}" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <Button Content="Update bridge" Style="{StaticResource GhostButtonStyle}" Click="UpdateBridge_Click"/>
-                    <Button Content="Run bridge" Click="RunBridge_Click" Margin="10,0,0,0"/>
+                    <Button x:Name="RunStopBridgeButton" Content="Run bridge" Click="RunStopBridge_Click" Margin="10,0,0,0"/>
                     <Button Content="Refresh" Style="{StaticResource GhostButtonStyle}" Click="Refresh_Click" Margin="10,0,0,0"/>
                 </StackPanel>
             </Grid>
-            <TextBlock x:Name="StatusText" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,16"/>
+            <TextBlock x:Name="StatusText" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,8"/>
+            <!-- Search, filters, sort, watchlist (themed like dashboard pill) -->
+            <Border Background="{StaticResource HeroControlBackgroundBrush}" BorderBrush="{StaticResource HeroControlBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="14,10" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBox x:Name="SearchBox" Grid.Row="0" Grid.Column="0" Style="{StaticResource TextBoxHeroStyle}" Margin="0,0,8,0" VerticalAlignment="Center"
+                              ToolTip="Search by vehicle model, seller, title..."
+                              TextChanged="SearchOrFilter_Changed"/>
+                    <ComboBox x:Name="SortCombo" Grid.Row="0" Grid.Column="1" Style="{StaticResource ComboBoxHeroStyle}" ItemContainerStyle="{StaticResource ComboBoxItemDarkStyle}" Width="140" Margin="0,0,8,0" VerticalAlignment="Center" SelectionChanged="SearchOrFilter_Changed"/>
+                    <ComboBox x:Name="ShowFilterCombo" Grid.Row="0" Grid.Column="2" Style="{StaticResource ComboBoxHeroStyle}" ItemContainerStyle="{StaticResource ComboBoxItemDarkStyle}" Width="100" Margin="0,0,8,0" VerticalAlignment="Center" SelectionChanged="SearchOrFilter_Changed"/>
+                    <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Price:" VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{StaticResource HeroControlMutedBrush}" FontSize="12"/>
+                        <TextBox x:Name="PriceMinBox" Width="70" Style="{StaticResource TextBoxHeroStyle}" Margin="0,0,4,0" ToolTip="Min price" TextChanged="SearchOrFilter_Changed"/>
+                        <TextBlock Text="–" VerticalAlignment="Center" Foreground="{StaticResource HeroControlMutedBrush}"/>
+                        <TextBox x:Name="PriceMaxBox" Width="70" Style="{StaticResource TextBoxHeroStyle}" Margin="4,0,0,0" ToolTip="Max price" TextChanged="SearchOrFilter_Changed"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
             <ItemsControl x:Name="ListingsItems">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -33,22 +75,40 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type models:CarSwapListing}">
+                    <DataTemplate DataType="{x:Type models:CarSwapDisplayItem}">
                         <Border Style="{StaticResource TileCardStyle}" Width="320" MinHeight="140" Margin="0,0,12,12">
                             <StackPanel>
-                                <TextBlock Text="{Binding Title}" Style="{StaticResource CardTitleTextStyle}"/>
-                                <TextBlock Text="{Binding Description}" Style="{StaticResource CardSubtitleTextStyle}" MaxHeight="36" TextTrimming="CharacterEllipsis" Margin="0,6,0,0"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Listing.Title}" Style="{StaticResource CardTitleTextStyle}" TextTrimming="CharacterEllipsis"/>
+                                    <Button Grid.Column="1" Padding="4" Margin="0,-4,0,0" Click="ToggleWatchlist_Click" Tag="{Binding}" ToolTip="Toggle watchlist">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource GhostButtonStyle}">
+                                                <Setter Property="Content" Value="☆"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                        <Setter Property="Content" Value="★"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                                <TextBlock Text="{Binding Listing.Description}" Style="{StaticResource CardSubtitleTextStyle}" MaxHeight="36" TextTrimming="CharacterEllipsis" Margin="0,6,0,0"/>
                                 <Grid Margin="0,8,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding ModelDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
-                                        <TextBlock Text="{Binding SellerDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
-                                        <TextBlock Text="{Binding YearDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
+                                        <TextBlock Text="{Binding Listing.ModelDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
+                                        <TextBlock Text="{Binding Listing.SellerDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
+                                        <TextBlock Text="{Binding Listing.YearDisplay}" Style="{StaticResource CardSubtitleTextStyle}"/>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" Style="{StaticResource CardTitleTextStyle}" VerticalAlignment="Top"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Listing.PriceDisplay}" Style="{StaticResource CardTitleTextStyle}" VerticalAlignment="Top"/>
                                 </Grid>
                             </StackPanel>
                         </Border>

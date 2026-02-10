@@ -51,6 +51,7 @@ namespace RLSHub.Wpf.Services
                         VehicleYear = listing.VehicleYear,
                         Mileage = listing.Mileage ?? 0,
                         Status = listing.Status ?? string.Empty,
+                        CreatedAtUtc = listing.CreatedAt,
                         PriceDisplay = priceDisplay,
                         SellerDisplay = seller,
                         ModelDisplay = model,
@@ -122,6 +123,7 @@ namespace RLSHub.Wpf.Services
             [JsonPropertyName("vehicle_year")] public int? VehicleYear { get; set; }
             [JsonPropertyName("mileage")] public long? Mileage { get; set; }
             [JsonPropertyName("status")] public string? Status { get; set; }
+            [JsonPropertyName("created_at")] public DateTime? CreatedAt { get; set; }
         }
     }
 }

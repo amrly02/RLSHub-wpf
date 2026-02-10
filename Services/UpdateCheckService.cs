@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -14,6 +15,9 @@ namespace RLSHub.Wpf.Services
         private const string GitHubApiBase = "https://api.github.com";
         private const string DefaultUserAgent = "RLSHub-UpdateCheck/1.0";
         private const string ModTagId = "RLSCO24";
+
+        /// <summary>GitHub repo for the RLSHub app (owner/repo).</summary>
+        public static (string Owner, string Repo) AppRepo => ("RLS-Modding", "RLSHub");
         private static readonly string[] ModFolderNames = { "rls_career_overhaul", "rls-career-overhaul", "rls career overhaul" };
 
         private readonly HttpClient _httpClient;
@@ -132,7 +136,16 @@ namespace RLSHub.Wpf.Services
             catch { return (null, null); }
         }
 
-        public static Version GetCurrentVersion() => new Version(1, 0, 0, 0);
+        /// <summary>Gets the current RLSHub app version from the entry assembly.</summary>
+        public static Version GetCurrentAppVersion()
+        {
+            try
+            {
+                var v = Assembly.GetExecutingAssembly().GetName().Version;
+                return v ?? new Version(1, 0, 0, 0);
+            }
+            catch { return new Version(1, 0, 0, 0); }
+        }
 
         public async Task<(Version TagVersion, string HtmlUrl)> FetchLatestReleaseAsync()
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -8,6 +9,45 @@ namespace RLSHub.Wpf.Services
     {
         private const string BridgeFolderName = "Bridge";
         private const string BridgeFileName = "bridge.exe";
+
+        private static Process? _currentBridgeProcess;
+
+        /// <summary>Register the bridge process so it can be killed when the app exits.</summary>
+        public static void RegisterBridgeProcess(Process process)
+        {
+            _currentBridgeProcess = process;
+        }
+
+        /// <summary>Creates ProcessStartInfo for the bridge: no window, redirected output. Do not set Environment so the child gets default inheritance and the bridge exe is not confused by extra vars.</summary>
+        public static ProcessStartInfo CreateBridgeProcessStartInfo(string bridgeExePath)
+        {
+            var workDir = Path.GetDirectoryName(bridgeExePath);
+            return new ProcessStartInfo
+            {
+                FileName = bridgeExePath,
+                WorkingDirectory = !string.IsNullOrEmpty(workDir) && Directory.Exists(workDir) ? workDir : null,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+        }
+
+        /// <summary>Kill the bridge process if we started it. Call on app exit.</summary>
+        public static void KillCurrentBridge()
+        {
+            try
+            {
+                if (_currentBridgeProcess == null) return;
+                if (!_currentBridgeProcess.HasExited)
+                    _currentBridgeProcess.Kill(entireProcessTree: true);
+            }
+            catch { }
+            finally
+            {
+                _currentBridgeProcess = null;
+            }
+        }
 
         public string GetLocalBridgePath()
         {
@@ -47,7 +87,7 @@ namespace RLSHub.Wpf.Services
                 Directory.CreateDirectory(directory);
             await using var sourceStream = File.OpenRead(source);
             await using var destinationStream = File.Create(destination);
-            await sourceStream.CopyToAsync(destinationStream);
+            await sourceStream.CopyToAsync(destinationStream).ConfigureAwait(false);
         }
 
         private static string GetPackagedBridgePath()

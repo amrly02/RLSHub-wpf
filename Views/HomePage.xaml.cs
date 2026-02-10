@@ -12,6 +12,8 @@ namespace RLSHub.Wpf.Views
     public partial class HomePage : UserControl
     {
         private readonly BridgeScriptService _bridgeService = new();
+        private readonly DashboardPreferencesStore _dashboardPrefs = new();
+        private bool _ignoreCheckChanges;
 
         public HomePage()
         {
@@ -25,8 +27,91 @@ namespace RLSHub.Wpf.Views
             {
                 RendererCombo.Items.Add("Vulkan");
                 RendererCombo.Items.Add("DirectX");
-                RendererCombo.SelectedIndex = 0;
             }
+
+            var prefs = _dashboardPrefs.Load();
+            _ignoreCheckChanges = true;
+            try
+            {
+                RendererCombo.SelectedIndex = Math.Clamp(prefs.RendererIndex, 0, 1);
+                ConsoleCheckBox.IsChecked = prefs.EnableConsole;
+                AutoBridgeCheckBox.IsChecked = prefs.AutoRunBridge;
+            }
+            finally
+            {
+                _ignoreCheckChanges = false;
+            }
+
+            RendererCombo.SelectionChanged += DashboardSelection_Changed;
+            ConsoleCheckBox.Checked += DashboardCheck_Changed;
+            ConsoleCheckBox.Unchecked += DashboardCheck_Changed;
+            AutoBridgeCheckBox.Checked += DashboardCheck_Changed;
+            AutoBridgeCheckBox.Unchecked += DashboardCheck_Changed;
+
+            RefreshLaunchStatus();
+            var statusTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(8),
+                IsEnabled = true
+            };
+            statusTimer.Tick += (_, _) => RefreshLaunchStatus();
+            statusTimer.Start();
+        }
+
+        private void DashboardSelection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (_ignoreCheckChanges || RendererCombo.SelectedIndex < 0) return;
+            SaveDashboardPreferences();
+        }
+
+        private void DashboardCheck_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_ignoreCheckChanges) return;
+            SaveDashboardPreferences();
+        }
+
+        private void SaveDashboardPreferences()
+        {
+            var p = _dashboardPrefs.Load();
+            _dashboardPrefs.Save(p with
+            {
+                EnableConsole = ConsoleCheckBox.IsChecked == true,
+                AutoRunBridge = AutoBridgeCheckBox.IsChecked == true,
+                RendererIndex = Math.Clamp(RendererCombo.SelectedIndex, 0, 1)
+            });
+        }
+
+        private void SaveLastLaunchUtc()
+        {
+            var p = _dashboardPrefs.Load();
+            _dashboardPrefs.Save(p with { LastLaunchUtc = DateTime.UtcNow });
+        }
+
+        private void RefreshLaunchStatus()
+        {
+            var running = IsBeamNgRunning();
+            BeamNgStatusText.Text = running ? "BeamNG: Running" : "BeamNG: Not running";
+            var prefs = _dashboardPrefs.Load();
+            if (prefs.LastLaunchUtc.HasValue)
+            {
+                var ago = DateTime.UtcNow - prefs.LastLaunchUtc.Value;
+                LastLaunchText.Text = ago.TotalMinutes < 1 ? "Last launched: just now"
+                    : ago.TotalMinutes < 60 ? $"Last launched: {(int)ago.TotalMinutes} min ago"
+                    : ago.TotalHours < 24 ? $"Last launched: {(int)ago.TotalHours} hr ago"
+                    : $"Last launched: {(int)ago.TotalDays} day(s) ago";
+                LastLaunchText.Visibility = Visibility.Visible;
+            }
+            else
+                LastLaunchText.Visibility = Visibility.Collapsed;
+        }
+
+        private static bool IsBeamNgRunning()
+        {
+            try
+            {
+                return System.Diagnostics.Process.GetProcessesByName("BeamNG.drive.x64").Length > 0;
+            }
+            catch { return false; }
         }
 
         private async void LaunchButton_Click(object sender, RoutedEventArgs e)
@@ -69,6 +154,8 @@ namespace RLSHub.Wpf.Views
                     WorkingDirectory = Directory.Exists(config.InstallPath) ? config.InstallPath : null,
                     UseShellExecute = true
                 });
+                SaveLastLaunchUtc();
+                RefreshLaunchStatus();
             }
             catch (Exception ex)
             {
@@ -104,34 +191,62 @@ namespace RLSHub.Wpf.Views
             if (!File.Exists(path))
                 return (false, "Bridge executable not found at: " + path);
 
-            var workDir = Path.GetDirectoryName(path);
             try
             {
-                var psi = new ProcessStartInfo
+                var psi = BridgeScriptService.CreateBridgeProcessStartInfo(path);
+                var process = Process.Start(psi);
+                if (process == null)
+                    return (false, "Could not start bridge process.");
+                BridgeScriptService.RegisterBridgeProcess(process);
+
+                const int bridgePort = 8766;
+                const int maxWaitMs = 15000;
+                const int stepMs = 250;
+                for (var elapsed = 0; elapsed < maxWaitMs; elapsed += stepMs)
                 {
-                    FileName = path,
-                    UseShellExecute = true,
-                    WorkingDirectory = !string.IsNullOrEmpty(workDir) && Directory.Exists(workDir) ? workDir : null,
-                    CreateNoWindow = false
-                };
-                Process.Start(psi);
+                    await Task.Delay(stepMs).ConfigureAwait(false);
+                    if (IsBridgeListening(bridgePort))
+                    {
+                        _ = DiscardBridgeOutputAsync(process);
+                        return (true, null);
+                    }
+                    if (process.HasExited)
+                        break;
+                }
+
+                var errDetail = "";
+                try
+                {
+                    if (process.HasExited)
+                        errDetail = process.StandardError.ReadToEnd().Trim();
+                }
+                catch { /* ignore */ }
+                if (!string.IsNullOrEmpty(errDetail))
+                    errDetail = " Bridge output: " + errDetail;
+                return (false, "Bridge did not start listening on port " + bridgePort + " in time." + errDetail);
             }
             catch (Exception ex)
             {
                 return (false, "Could not start bridge: " + ex.Message);
             }
+        }
 
-            const int bridgePort = 8766;
-            const int maxWaitMs = 5000;
-            const int stepMs = 200;
-            for (var elapsed = 0; elapsed < maxWaitMs; elapsed += stepMs)
+        /// <summary>Reads and discards bridge stdout/stderr so the process does not block on full pipes.</summary>
+        private static async Task DiscardBridgeOutputAsync(Process process)
+        {
+            var buffer = new char[256];
+            void Drain(StreamReader reader)
             {
-                await Task.Delay(stepMs).ConfigureAwait(false);
-                if (IsBridgeListening(bridgePort))
-                    return (true, null);
+                try
+                {
+                    while (!process.HasExited && reader.Read(buffer, 0, buffer.Length) > 0) { }
+                }
+                catch { /* ignore */ }
             }
-
-            return (false, "Bridge did not start listening on port " + bridgePort + " in time.");
+            await Task.WhenAll(
+                Task.Run(() => Drain(process.StandardOutput)),
+                Task.Run(() => Drain(process.StandardError))
+            ).ConfigureAwait(false);
         }
 
         private static bool IsBridgeListening(int port)

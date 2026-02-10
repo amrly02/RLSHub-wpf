@@ -1,3 +1,5 @@
+using System;
+
 namespace RLSHub.Wpf.Models
 {
     public sealed class CarSwapListing
@@ -11,6 +13,7 @@ namespace RLSHub.Wpf.Models
         public int? VehicleYear { get; set; }
         public long Mileage { get; set; }
         public string Status { get; set; } = string.Empty;
+        public DateTime? CreatedAtUtc { get; set; }
         public string PriceDisplay { get; set; } = string.Empty;
         public string SellerDisplay { get; set; } = string.Empty;
         public string ModelDisplay { get; set; } = string.Empty;

@@ -38,8 +38,14 @@ if ([string]::IsNullOrWhiteSpace($tag)) {
 $tag = $tag.Trim()
 
 # If release or tag already exists, offer to delete and recreate (avoids "tag already exists" after deleting on GitHub)
-$null = gh release view $tag 2>$null
-$releaseExists = ($LASTEXITCODE -eq 0)
+$releaseExists = $false
+try {
+    $ErrorActionPreference = 'SilentlyContinue'
+    $null = gh release view $tag 2>$null
+    $releaseExists = ($LASTEXITCODE -eq 0)
+} finally {
+    $ErrorActionPreference = 'Stop'
+}
 if ($releaseExists) {
     Write-Host "Release/tag '$tag' already exists." -ForegroundColor Yellow
     $overwrite = Read-Host "Delete it and create a new release with this build? (y/n)"

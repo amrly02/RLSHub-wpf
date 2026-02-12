@@ -105,12 +105,16 @@
                             </StackPanel>
                         </ToggleButton>
                         <ToggleButton x:Name="NavUpdates" Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Style="{StaticResource NavToggleStyle}" Tag="updates" Click="Nav_Click" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                            <Grid>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Grid MinWidth="100">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <TextBlock Text="&#xE895;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Updates" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <Ellipse x:Name="UpdatesBadge" Width="8" Height="8" Fill="{StaticResource AccentBrush}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,4,4,0" Visibility="Collapsed"/>
+                                <Ellipse x:Name="UpdatesBadge" Grid.Column="1" Width="8" Height="8" Fill="{StaticResource AccentBrush}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,6,0,0" Visibility="Collapsed"/>
                             </Grid>
                         </ToggleButton>
                         <ToggleButton x:Name="NavSettings" Grid.Row="0" Grid.Column="3" Grid.RowSpan="2" Style="{StaticResource NavToggleStyle}" Tag="settings" Click="Nav_Click" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">

@@ -7,14 +7,8 @@
         <StackPanel>
             <TextBlock Text="CarSwap" Style="{StaticResource SectionHeaderTextStyle}" Margin="0,0,0,6"/>
             <TextBlock Text="Community marketplace for buying and selling vehicles in the Career Overhaul." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,0,0,20"/>
-            <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,16">
-                <StackPanel>
-                    <TextBlock Text="What is CarSwap?" Style="{StaticResource CardTitleTextStyle}"/>
-                    <TextBlock Text="Listings here are synced with the in-game marketplace. Use Run bridge to sync listings into the game; Update bridge refreshes the bridge executable from the app." Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                </StackPanel>
-            </Border>
-            <!-- Bridge status: red when stopped, green when running; expandable to show output -->
-            <Border Style="{StaticResource TileCardStyle}" Padding="12,10" Margin="0,0,0,8">
+            <!-- Bridge status: red when stopped, green when running; expandable to show output (same look as filters box) -->
+            <Border Background="{StaticResource HeroControlBackgroundBrush}" BorderBrush="{StaticResource HeroControlBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="14,10" Margin="0,0,0,8">
                 <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>

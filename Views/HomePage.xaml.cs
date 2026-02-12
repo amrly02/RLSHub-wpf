@@ -14,11 +14,19 @@ namespace RLSHub.Wpf.Views
         private readonly BridgeScriptService _bridgeService = new();
         private readonly DashboardPreferencesStore _dashboardPrefs = new();
         private bool _ignoreCheckChanges;
+        private System.Windows.Threading.DispatcherTimer? _launchStatusTimer;
 
         public HomePage()
         {
             InitializeComponent();
             Loaded += HomePage_Loaded;
+            Unloaded += HomePage_Unloaded;
+        }
+
+        private void HomePage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _launchStatusTimer?.Stop();
+            _launchStatusTimer = null;
         }
 
         private void HomePage_Loaded(object sender, RoutedEventArgs e)
@@ -49,13 +57,13 @@ namespace RLSHub.Wpf.Views
             AutoBridgeCheckBox.Unchecked += DashboardCheck_Changed;
 
             RefreshLaunchStatus();
-            var statusTimer = new System.Windows.Threading.DispatcherTimer
+            _launchStatusTimer = new System.Windows.Threading.DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(8),
                 IsEnabled = true
             };
-            statusTimer.Tick += (_, _) => RefreshLaunchStatus();
-            statusTimer.Start();
+            _launchStatusTimer.Tick += (_, _) => RefreshLaunchStatus();
+            _launchStatusTimer.Start();
         }
 
         private void DashboardSelection_Changed(object sender, SelectionChangedEventArgs e)

@@ -17,7 +17,7 @@ namespace RLSHub.Wpf.Services
         private const string ModTagId = "RLSCO24";
 
         /// <summary>GitHub repo for the RLSHub app (owner/repo).</summary>
-        public static (string Owner, string Repo) AppRepo => ("RLS-Modding", "RLSHub");
+        public static (string Owner, string Repo) AppRepo => ("amrly02", "RLSHub-wpf");
         private static readonly string[] ModFolderNames = { "rls_career_overhaul", "rls-career-overhaul", "rls career overhaul" };
 
         private readonly HttpClient _httpClient;
@@ -147,20 +147,54 @@ namespace RLSHub.Wpf.Services
             catch { return new Version(1, 0, 0, 0); }
         }
 
-        public async Task<(Version TagVersion, string HtmlUrl)> FetchLatestReleaseAsync()
+        /// <summary>Formats a version for display: trims trailing zeros so 1.1.0.0 shows as 1.1, 1.1.2.3 as 1.1.2.3.</summary>
+        public static string FormatVersionDisplay(Version v)
         {
-            var url = $"{GitHubApiBase}/repos/{_owner}/{_repo}/releases/latest";
-            using var request = new HttpRequestMessage(HttpMethod.Get, url);
-            var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            if (v == null) return "0.0";
+            var parts = new List<int> { v.Major, v.Minor };
+            if (v.Build >= 0) parts.Add(v.Build);
+            if (v.Revision >= 0) parts.Add(v.Revision);
+            while (parts.Count > 2 && parts[parts.Count - 1] == 0)
+                parts.RemoveAt(parts.Count - 1);
+            return string.Join(".", parts);
+        }
+
+        /// <summary>Fetches the latest release. When includePrereleases is true, uses the list endpoint so pre-releases are included.</summary>
+        /// <returns>TagVersion, HtmlUrl, IsPrerelease</returns>
+        public async Task<(Version TagVersion, string HtmlUrl, bool IsPrerelease)> FetchLatestReleaseAsync(bool includePrereleases = false)
+        {
+            if (includePrereleases)
+            {
+                var url = $"{GitHubApiBase}/repos/{_owner}/{_repo}/releases?per_page=10";
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    throw new InvalidOperationException($"Repository not found (404). https://github.com/{_owner}/{_repo}");
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                using var doc = JsonDocument.Parse(json);
+                var releases = doc.RootElement;
+                if (releases.GetArrayLength() == 0)
+                    throw new InvalidOperationException($"No releases found. https://github.com/{_owner}/{_repo}/releases");
+                var root = releases[0];
+                var tagName = root.GetProperty("tag_name").GetString() ?? "";
+                var htmlUrl = root.GetProperty("html_url").GetString() ?? $"https://github.com/{_owner}/{_repo}/releases";
+                var isPrerelease = root.TryGetProperty("prerelease", out var preProp) && preProp.GetBoolean();
+                return (ParseTagToVersion(tagName), htmlUrl, isPrerelease);
+            }
+
+            var latestUrl = $"{GitHubApiBase}/repos/{_owner}/{_repo}/releases/latest";
+            using var latestRequest = new HttpRequestMessage(HttpMethod.Get, latestUrl);
+            var latestResponse = await _httpClient.SendAsync(latestRequest).ConfigureAwait(false);
+            if (latestResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
                 throw new InvalidOperationException($"Repository or latest release not found (404). https://github.com/{_owner}/{_repo}");
-            response.EnsureSuccessStatusCode();
-            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-            var tagName = root.GetProperty("tag_name").GetString() ?? "";
-            var htmlUrl = root.GetProperty("html_url").GetString() ?? $"https://github.com/{_owner}/{_repo}/releases";
-            return (ParseTagToVersion(tagName), htmlUrl);
+            latestResponse.EnsureSuccessStatusCode();
+            var latestJson = await latestResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            using var latestDoc = JsonDocument.Parse(latestJson);
+            var latestRoot = latestDoc.RootElement;
+            var latestTagName = latestRoot.GetProperty("tag_name").GetString() ?? "";
+            var latestHtmlUrl = latestRoot.GetProperty("html_url").GetString() ?? $"https://github.com/{_owner}/{_repo}/releases";
+            return (ParseTagToVersion(latestTagName), latestHtmlUrl, false);
         }
 
         public static Version ParseTagToVersion(string tagName)

@@ -51,20 +51,20 @@ namespace RLSHub.Wpf
                 var appCurrent = UpdateCheckService.GetCurrentAppVersion();
                 var modCurrent = UpdateCheckService.GetInstalledModVersion().Version ?? new Version(0, 0, 0, 0);
 
-                var appTask = appService.FetchLatestReleaseAsync();
-                var modTask = modService.FetchLatestReleaseAsync();
+                var appTask = appService.FetchLatestReleaseAsync(includePrereleases: true);
+                var modTask = modService.FetchLatestReleaseAsync(includePrereleases: false);
 
                 var appUpdate = false;
                 var modUpdate = false;
                 try
                 {
-                    var (tag, _) = await appTask.ConfigureAwait(false);
+                    var (tag, _, _) = await appTask.ConfigureAwait(false);
                     appUpdate = UpdateCheckService.IsUpdateAvailable(appCurrent, tag);
                 }
                 catch { /* ignore */ }
                 try
                 {
-                    var (tag, _) = await modTask.ConfigureAwait(false);
+                    var (tag, _, _) = await modTask.ConfigureAwait(false);
                     modUpdate = UpdateCheckService.IsUpdateAvailable(modCurrent, tag);
                 }
                 catch { /* ignore */ }

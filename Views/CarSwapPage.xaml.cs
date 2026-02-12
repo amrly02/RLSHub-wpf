@@ -45,6 +45,13 @@ namespace RLSHub.Wpf.Views
             InitializeComponent();
             ListingsItems.ItemsSource = _displayItems;
             Loaded += CarSwapPage_Loaded;
+            Unloaded += CarSwapPage_Unloaded;
+        }
+
+        private void CarSwapPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _bridgeStatusTimer?.Stop();
+            _bridgeStatusTimer = null;
         }
 
         private async void CarSwapPage_Loaded(object sender, RoutedEventArgs e)
@@ -70,15 +77,30 @@ namespace RLSHub.Wpf.Views
             await RefreshListingsAsync();
             UpdateBridgeStatusIndicator();
             _bridgeStatusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
-            _bridgeStatusTimer.Tick += (_, _) => UpdateBridgeStatusIndicator();
+            _bridgeStatusTimer.Tick += BridgeStatusTimer_Tick;
             _bridgeStatusTimer.Start();
+        }
+
+        private void BridgeStatusTimer_Tick(object? sender, EventArgs e)
+        {
+            if (!IsLoaded) return;
+            _ = Task.Run(() => IsBridgeListening(BridgePort))
+                .ContinueWith(t => Dispatcher.BeginInvoke(() =>
+                {
+                    if (IsLoaded) UpdateBridgeStatusIndicator(t.Result);
+                }), TaskScheduler.Default);
         }
 
         private async void Refresh_Click(object sender, RoutedEventArgs e) => await RefreshListingsAsync();
 
         private void UpdateBridgeStatusIndicator()
         {
-            var running = IsBridgeListening(BridgePort);
+            UpdateBridgeStatusIndicator(IsBridgeListening(BridgePort));
+        }
+
+        private void UpdateBridgeStatusIndicator(bool running)
+        {
+            if (!IsLoaded || BridgeStatusText == null) return;
             if (RunStopBridgeButton != null)
             {
                 RunStopBridgeButton.Content = running ? "Stop bridge" : "Run bridge";

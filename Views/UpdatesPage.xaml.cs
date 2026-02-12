@@ -26,7 +26,8 @@ namespace RLSHub.Wpf.Views
         private void UpdatesPage_Loaded(object sender, RoutedEventArgs e)
         {
             var appVer = UpdateCheckService.GetCurrentAppVersion();
-            AppVersionText.Text = $"Installed: v{appVer}";
+            AppVersionText.Text = $"Installed: v{UpdateCheckService.FormatVersionDisplay(appVer)}";
+            _ = RefreshInstalledPreReleaseLabelAsync(appVer);
 
             var (modVersion, modVersionString) = UpdateCheckService.GetInstalledModVersion();
             if (modVersion != null)
@@ -53,11 +54,13 @@ namespace RLSHub.Wpf.Views
 
                 Version? appLatest = null;
                 string? appUrl = null;
+                var appLatestIsPrerelease = false;
                 try
                 {
-                    var (tag, htmlUrl) = await _appUpdateService.FetchLatestReleaseAsync().ConfigureAwait(true);
+                    var (tag, htmlUrl, isPrerelease) = await _appUpdateService.FetchLatestReleaseAsync(includePrereleases: true).ConfigureAwait(true);
                     appLatest = tag;
                     appUrl = htmlUrl;
+                    appLatestIsPrerelease = isPrerelease;
                 }
                 catch (Exception ex)
                 {
@@ -69,7 +72,7 @@ namespace RLSHub.Wpf.Views
                 string? modUrl = null;
                 try
                 {
-                    var (tag, htmlUrl) = await _modUpdateService.FetchLatestReleaseAsync().ConfigureAwait(true);
+                    var (tag, htmlUrl, _) = await _modUpdateService.FetchLatestReleaseAsync(includePrereleases: false).ConfigureAwait(true);
                     modLatest = tag;
                     modUrl = htmlUrl;
                 }
@@ -81,16 +84,27 @@ namespace RLSHub.Wpf.Views
 
                 if (appLatest != null)
                 {
+                    var appVerDisplay = UpdateCheckService.FormatVersionDisplay(appLatest);
                     var appUpdateAvailable = UpdateCheckService.IsUpdateAvailable(appCurrent, appLatest);
-                    AppUpdateStatusText.Text = appUpdateAvailable
-                        ? $"New version v{appLatest} available."
-                        : "App is up to date.";
+                    if (appUpdateAvailable)
+                    {
+                        AppUpdateStatusText.Text = appLatestIsPrerelease
+                            ? $"New pre-release v{appVerDisplay} available."
+                            : $"New version v{appVerDisplay} available.";
+                    }
+                    else
+                    {
+                        AppUpdateStatusText.Text = "App is up to date.";
+                        if (appLatestIsPrerelease && appCurrent.CompareTo(appLatest) == 0)
+                            AppVersionText.Text = $"Installed: v{UpdateCheckService.FormatVersionDisplay(appCurrent)} (Pre-release)";
+                    }
                     AppUpdateStatusText.Visibility = Visibility.Visible;
                     if (appUpdateAvailable && appUrl != null)
                     {
+                        var preNote = appLatestIsPrerelease ? " (pre-release)" : "";
                         var open = MessageBox.Show(
-                            $"A new RLSHub version (v{appLatest}) is available.\n\nOpen the releases page?",
-                            "App update available",
+                            $"A new RLSHub version (v{appVerDisplay}) is available{preNote}.\n\nOpen the releases page?",
+                            appLatestIsPrerelease ? "App pre-release available" : "App update available",
                             MessageBoxButton.YesNo,
                             MessageBoxImage.Information);
                         if (open == MessageBoxResult.Yes)
@@ -129,6 +143,17 @@ namespace RLSHub.Wpf.Views
             {
                 btn.IsEnabled = true;
             }
+        }
+
+        private async System.Threading.Tasks.Task RefreshInstalledPreReleaseLabelAsync(Version appCurrent)
+        {
+            try
+            {
+                var (tag, _, isPrerelease) = await _appUpdateService.FetchLatestReleaseAsync(includePrereleases: true).ConfigureAwait(false);
+                if (isPrerelease && appCurrent.CompareTo(tag) == 0)
+                    Dispatcher.Invoke(() => AppVersionText.Text = $"Installed: v{UpdateCheckService.FormatVersionDisplay(appCurrent)} (Pre-release)");
+            }
+            catch { /* ignore */ }
         }
 
         private void NotifyCheck_Changed(object sender, RoutedEventArgs e)

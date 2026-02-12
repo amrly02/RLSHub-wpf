@@ -9,7 +9,7 @@
             <!-- RLSHub app -->
             <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="RLSHub (this app)" Style="{StaticResource CardTitleTextStyle}"/>
+                    <TextBlock Text="RLSHub App" Style="{StaticResource CardTitleTextStyle}"/>
                     <TextBlock x:Name="AppVersionText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
                     <TextBlock x:Name="AppUpdateStatusText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,4,0,0" Visibility="Collapsed"/>
                 </StackPanel>
@@ -17,7 +17,7 @@
             <!-- Mod -->
             <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="RLS Career Overhaul (mod)" Style="{StaticResource CardTitleTextStyle}"/>
+                    <TextBlock Text="RLS Career Overhaul Mod" Style="{StaticResource CardTitleTextStyle}"/>
                     <TextBlock x:Name="ModVersionText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,6,0,0"/>
                     <TextBlock x:Name="ModUpdateStatusText" Style="{StaticResource CardSubtitleTextStyle}" TextWrapping="Wrap" Margin="0,4,0,0" Visibility="Collapsed"/>
                 </StackPanel>

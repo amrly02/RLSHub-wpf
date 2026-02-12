@@ -35,6 +35,23 @@ if ([string]::IsNullOrWhiteSpace($tag)) {
     Write-Host "Tag is required."
     exit 1
 }
+$tag = $tag.Trim()
+
+# If release or tag already exists, offer to delete and recreate (avoids "tag already exists" after deleting on GitHub)
+$null = gh release view $tag 2>$null
+$releaseExists = ($LASTEXITCODE -eq 0)
+if ($releaseExists) {
+    Write-Host "Release/tag '$tag' already exists." -ForegroundColor Yellow
+    $overwrite = Read-Host "Delete it and create a new release with this build? (y/n)"
+    if ($overwrite -match '^[yY]') {
+        Write-Host "Deleting existing release and tag..." -ForegroundColor Cyan
+        gh release delete $tag --cleanup-tag --yes 2>$null
+        git tag -d $tag 2>$null
+    } else {
+        Write-Host "Skipped."
+        exit 0
+    }
+}
 
 $notes = Read-Host "Release notes (optional; press Enter to skip)"
 $title = "RLSHub WPF $tag"
@@ -53,7 +70,9 @@ Write-Host ""
 Write-Host "Creating release $tag and uploading RLSHub.Wpf.exe..." -ForegroundColor Cyan
 & gh @createArgs
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Upload failed (e.g. tag already exists or not authenticated)." -ForegroundColor Red
+    Write-Host "Upload failed (e.g. tag still exists elsewhere or not authenticated)." -ForegroundColor Red
+    Write-Host "Try: gh release delete $tag --cleanup-tag --yes" -ForegroundColor Yellow
+    Write-Host "Then delete local tag if needed: git tag -d $tag" -ForegroundColor Yellow
     exit 1
 }
 Write-Host "Done. Release: https://github.com/$(gh repo view --json nameWithOwner -q .nameWithOwner)/releases/tag/$tag" -ForegroundColor Green

@@ -1,11 +1,17 @@
 <Window x:Class="RLSHub.Wpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="RLSHub"
         MinWidth="900" MinHeight="600"
         Width="1200" Height="750"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResize"
         Background="{StaticResource ShellBackgroundBrush}">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="32" ResizeBorderThickness="4" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
     <Grid>
         <!-- Animated background: soft ellipses + falling BeamNG-style logos (triangle with circles at vertices) -->
         <Canvas IsHitTestVisible="False" ClipToBounds="False">
@@ -60,11 +66,25 @@
 
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <!-- Custom title bar (themed, draggable) -->
+            <Border x:Name="TitleBarBorder" Grid.Row="0" Background="{StaticResource ShellBackgroundBrush}" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                <Grid>
+                    <TextBlock Text="RLSHub" Style="{StaticResource SectionHeaderTextStyle}" FontSize="14" VerticalAlignment="Center" Margin="24,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+                        <Button x:Name="MinimizeButton" Style="{StaticResource TitleBarButtonStyle}" Content="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10" Click="MinimizeButton_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        <Button x:Name="MaximizeButton" Style="{StaticResource TitleBarButtonStyle}" FontFamily="Segoe MDL2 Assets" FontSize="10" Click="MaximizeButton_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <TextBlock x:Name="MaximizeButtonIcon" Text="&#xE740;"/>
+                        </Button>
+                        <Button x:Name="CloseButton" Style="{StaticResource TitleBarCloseButtonStyle}" Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10" Click="CloseButton_Click" shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
             <!-- Top nav bar with sliding underline indicator -->
-            <Border x:Name="NavBarBorder" Grid.Row="0" Background="#0A0A0A" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" Padding="24,10,24,0">
+            <Border x:Name="NavBarBorder" Grid.Row="1" Background="#0A0A0A" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="0,0,0,1" Padding="24,10,24,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -138,7 +158,7 @@
             </Border>
 
             <!-- Content area with entrance transition (slide + fade like WinUI 3) -->
-            <Grid x:Name="ContentHost" Grid.Row="1" ClipToBounds="True">
+            <Grid x:Name="ContentHost" Grid.Row="2" ClipToBounds="True">
                 <ContentControl x:Name="ContentFrame" Background="Transparent"/>
             </Grid>
         </Grid>

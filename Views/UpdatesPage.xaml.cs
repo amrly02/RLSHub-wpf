@@ -150,8 +150,12 @@ namespace RLSHub.Wpf.Views
             try
             {
                 var (tag, _, isPrerelease) = await _appUpdateService.FetchLatestReleaseAsync(includePrereleases: true).ConfigureAwait(false);
-                if (isPrerelease && appCurrent.CompareTo(tag) == 0)
-                    Dispatcher.Invoke(() => AppVersionText.Text = $"Installed: v{UpdateCheckService.FormatVersionDisplay(appCurrent)} (Pre-release)");
+                Dispatcher.Invoke(() =>
+                {
+                    if (!IsLoaded || AppVersionText == null) return;
+                    if (isPrerelease && appCurrent.CompareTo(tag) == 0)
+                        AppVersionText.Text = $"Installed: v{UpdateCheckService.FormatVersionDisplay(appCurrent)} (Pre-release)";
+                });
             }
             catch { /* ignore */ }
         }

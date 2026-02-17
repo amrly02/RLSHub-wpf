@@ -105,10 +105,14 @@ namespace RLSHub.Wpf.Views
             {
                 RunStopBridgeButton.Content = running ? "Stop bridge" : "Run bridge";
             }
+            var runningBrush = (Brush)FindResource("BridgeRunningBrush");
+            var stoppedBrush = (Brush)FindResource("BridgeStoppedBrush");
+            if (BridgeStatusDot != null)
+                BridgeStatusDot.Fill = running ? runningBrush : stoppedBrush;
             if (running)
             {
                 BridgeStatusText.Text = "Bridge running";
-                BridgeStatusText.Foreground = (Brush)FindResource("BridgeRunningBrush");
+                BridgeStatusText.Foreground = runningBrush;
                 var output = _bridgeOutput.ToString().Trim();
                 if (output.Length > 0)
                     output = string.Join(" ", output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
@@ -126,7 +130,7 @@ namespace RLSHub.Wpf.Views
                     _bridgeOutput.Clear();
                 }
                 BridgeStatusText.Text = "Bridge: not running";
-                BridgeStatusText.Foreground = (Brush)FindResource("BridgeStoppedBrush");
+                BridgeStatusText.Foreground = stoppedBrush;
                 BridgeOutputText.Visibility = Visibility.Collapsed;
                 BridgeExpandButton.Visibility = Visibility.Collapsed;
             }

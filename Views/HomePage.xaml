@@ -2,14 +2,30 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="Transparent">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="36,16,36,32">
         <StackPanel>
-            <Border Background="{StaticResource HeroGradientBrush}" CornerRadius="24" Padding="24" Margin="0,0,0,24">
+            <!-- Hero card with gradient -->
+            <Border Background="{StaticResource HeroGradientBrush}" CornerRadius="20" Padding="32,28" Margin="0,0,0,24" Opacity="0"
+                    RenderTransformOrigin="0.5,0.5">
+                <Border.RenderTransform>
+                    <TranslateTransform Y="16"/>
+                </Border.RenderTransform>
+                <Border.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="16" To="0" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Border.Triggers>
                 <StackPanel>
                     <TextBlock Text="RLS Hub" Style="{StaticResource HeroTitleTextStyle}"/>
-                    <TextBlock Text="Your command deck for the Career Overhaul experience." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,10,0,0"/>
-                    <!-- Launch options in a single pill (fits the hero card) -->
-                    <Border Background="{StaticResource HeroControlBackgroundBrush}" BorderBrush="{StaticResource HeroControlBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="14,10" Margin="0,14,0,0">
+                    <TextBlock Text="Your command deck for the Career Overhaul experience." Style="{StaticResource HeroSubtitleTextStyle}" Foreground="#B0B0B0" Margin="0,6,0,0"/>
+
+                    <!-- Launch options glass pill -->
+                    <Border Background="{StaticResource HeroControlBackgroundBrush}" BorderBrush="{StaticResource HeroControlBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="16,10" Margin="0,20,0,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="Renderer" Foreground="{StaticResource HeroControlMutedBrush}" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
                             <ComboBox x:Name="RendererCombo" Style="{StaticResource ComboBoxHeroStyle}" ItemContainerStyle="{StaticResource ComboBoxItemDarkStyle}" Width="110" VerticalAlignment="Center"/>
@@ -19,11 +35,26 @@
                             <CheckBox x:Name="AutoBridgeCheckBox" Style="{StaticResource CheckBoxHeroStyle}" Content="Auto-run CarSwap server" Margin="16,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
-                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+
+                    <!-- Action buttons -->
+                    <StackPanel Orientation="Horizontal" Margin="0,18,0,0">
                         <Button x:Name="LaunchButton" Content="Launch BeamNG" Click="LaunchButton_Click"/>
                         <Button x:Name="OpenUserFolderButton" Content="Open UserFolder" Style="{StaticResource GhostButtonStyle}" Click="OpenUserFolderButton_Click" Margin="12,0,0,0"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0" VerticalAlignment="Center">
+
+                    <!-- Status row -->
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0" VerticalAlignment="Center">
+                        <Ellipse x:Name="BeamNgStatusDot" Width="8" Height="8" Fill="{StaticResource BridgeStoppedBrush}" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <Ellipse.Triggers>
+                                <EventTrigger RoutedEvent="Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0.4" Duration="0:0:1.2" EasingFunction="{StaticResource EaseInOut}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Ellipse.Triggers>
+                        </Ellipse>
                         <TextBlock x:Name="LastLaunchText" Style="{StaticResource CardSubtitleTextStyle}" Visibility="Collapsed" Margin="0,0,16,0"/>
                         <TextBlock x:Name="BeamNgStatusText" Style="{StaticResource CardSubtitleTextStyle}" Text="BeamNG: Not running"/>
                     </StackPanel>

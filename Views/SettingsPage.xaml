@@ -2,21 +2,66 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="Transparent">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="36,16,36,32">
         <StackPanel>
-            <TextBlock Text="Settings" Style="{StaticResource SectionHeaderTextStyle}" Margin="0,0,0,6"/>
-            <TextBlock Text="Gameplay toggles and preferences." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,0,0,20"/>
-            <Border Style="{StaticResource TileCardStyle}" Padding="24" Margin="0,0,0,24">
+            <!-- Glass card with toggle switches -->
+            <Border Style="{StaticResource TileCardStaticStyle}" Padding="28,24" Margin="0,0,0,24" Opacity="0">
+                <Border.RenderTransform><TranslateTransform Y="16"/></Border.RenderTransform>
+                <Border.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="16" To="0" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Border.Triggers>
                 <StackPanel>
-                    <TextBlock Text="Gameplay Toggles" Style="{StaticResource CardTitleTextStyle}" Margin="0,0,0,14"/>
-                    <CheckBox x:Name="MapDevToggle" Style="{StaticResource CheckBoxDarkStyle}" Content="Map Dev Mode" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,6"/>
-                    <TextBlock Text="Enable developer mode for map editing and testing." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,14"/>
+                    <TextBlock Text="Gameplay Toggles" Style="{StaticResource CardTitleTextStyle}" Margin="0,0,0,20"/>
 
-                    <CheckBox x:Name="NoPoliceToggle" Style="{StaticResource CheckBoxDarkStyle}" Content="No Police Mode" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,6"/>
-                    <TextBlock Text="Disable police enforcement and traffic pursuits." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,14"/>
+                    <!-- Map Dev Mode -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Map Dev Mode" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Enable developer mode for map editing and testing." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <CheckBox x:Name="MapDevToggle" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" Checked="Toggle_Changed" Unchecked="Toggle_Changed" VerticalAlignment="Center"/>
+                    </Grid>
 
-                    <CheckBox x:Name="NoParkedToggle" Style="{StaticResource CheckBoxDarkStyle}" Content="No Parked Mode" Checked="Toggle_Changed" Unchecked="Toggle_Changed" Margin="0,0,0,6"/>
-                    <TextBlock Text="Remove parked vehicles for cleaner environments." Style="{StaticResource CardSubtitleTextStyle}"/>
+                    <Border Height="1" Background="{StaticResource SurfaceBorderBrush}" Margin="0,0,0,18"/>
+
+                    <!-- No Police Mode -->
+                    <Grid Margin="0,0,0,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="No Police Mode" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Disable police enforcement and traffic pursuits." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <CheckBox x:Name="NoPoliceToggle" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" Checked="Toggle_Changed" Unchecked="Toggle_Changed" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Border Height="1" Background="{StaticResource SurfaceBorderBrush}" Margin="0,0,0,18"/>
+
+                    <!-- No Parked Mode -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="No Parked Mode" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Remove parked vehicles for cleaner environments." Style="{StaticResource CardSubtitleTextStyle}" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <CheckBox x:Name="NoParkedToggle" Grid.Column="1" Style="{StaticResource ToggleSwitchStyle}" Checked="Toggle_Changed" Unchecked="Toggle_Changed" VerticalAlignment="Center"/>
+                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

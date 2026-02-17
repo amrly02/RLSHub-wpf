@@ -13,8 +13,8 @@ namespace RLSHub.Wpf
 {
     public partial class MainWindow : Window
     {
-        private static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(220);
-        private static readonly TimeSpan UnderlineTransitionDuration = TimeSpan.FromMilliseconds(200);
+        private static readonly TimeSpan TransitionDuration = TimeSpan.FromMilliseconds(280);
+        private static readonly TimeSpan IndicatorTransitionDuration = TimeSpan.FromMilliseconds(250);
         private readonly ToggleButton[] _navButtons;
         private ToggleButton? _pendingIndicatorButton;
 
@@ -43,13 +43,9 @@ namespace RLSHub.Wpf
         private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
-            {
                 MaximizeOrRestore();
-            }
             else
-            {
                 DragMove();
-            }
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
@@ -130,7 +126,6 @@ namespace RLSHub.Wpf
                     }
                 }
 
-                // Random starting height (0–700) so they don't all start in a line
                 double startTop = _random.Next(0, 701);
                 Canvas.SetTop(viewbox, startTop);
 
@@ -148,15 +143,12 @@ namespace RLSHub.Wpf
 
         private void StartRepeatFall(FrameworkElement viewbox, double fallTo)
         {
-            // Random reset height above view (-350 to -50) so they reappear at different heights
             double resetTop = -50 - _random.Next(0, 301);
             Canvas.SetTop(viewbox, resetTop);
 
-            // New random duration each loop so they stay out of sync
             double durationSeconds = 24 + _random.Next(0, 16);
             var repeatFall = new DoubleAnimation(resetTop, fallTo, TimeSpan.FromSeconds(durationSeconds))
             {
-                // Stagger start (0–18 sec) so they don't all drop from top at once
                 BeginTime = TimeSpan.FromSeconds(_random.Next(0, 19))
             };
             Storyboard.SetTarget(repeatFall, viewbox);
@@ -198,54 +190,51 @@ namespace RLSHub.Wpf
             if (NavIndicatorStrip == null || NavIndicator == null || NavBarBorder == null)
                 return;
 
-            // Force layout so ActualWidth and positions are up to date
             NavBarBorder.UpdateLayout();
 
-            // Use nav bar as common reference so coordinates are consistent after content changes
-            var buttonInBar = selectedButton.TranslatePoint(new Point(0, 0), NavBarBorder);
-            var stripInBar = NavIndicatorStrip.TranslatePoint(new Point(0, 0), NavBarBorder);
-            double left = buttonInBar.X - stripInBar.X;
-            double width = selectedButton.ActualWidth;
+            var buttonPos = selectedButton.TranslatePoint(new Point(0, 0), NavBarBorder);
+            double top = buttonPos.Y;
+            double height = selectedButton.ActualHeight;
 
-            if (width <= 0)
+            if (height <= 0)
                 return;
 
             if (animate)
             {
                 var currentMargin = NavIndicator.Margin;
-                var currentWidth = NavIndicator.Width;
-                if (double.IsNaN(currentWidth) || currentWidth <= 0)
-                    currentWidth = width;
+                var currentHeight = NavIndicator.Height;
+                if (double.IsNaN(currentHeight) || currentHeight <= 0)
+                    currentHeight = height;
 
                 var marginAnim = new ThicknessAnimation(
                     currentMargin,
-                    new Thickness(left, 0, 0, 0),
-                    UnderlineTransitionDuration)
+                    new Thickness(0, top, 0, 0),
+                    IndicatorTransitionDuration)
                 {
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
-                var widthAnim = new DoubleAnimation(
-                    currentWidth,
-                    width,
-                    UnderlineTransitionDuration)
+                var heightAnim = new DoubleAnimation(
+                    currentHeight,
+                    height,
+                    IndicatorTransitionDuration)
                 {
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
 
                 Storyboard.SetTarget(marginAnim, NavIndicator);
                 Storyboard.SetTargetProperty(marginAnim, new System.Windows.PropertyPath(Border.MarginProperty));
-                Storyboard.SetTarget(widthAnim, NavIndicator);
-                Storyboard.SetTargetProperty(widthAnim, new System.Windows.PropertyPath(FrameworkElement.WidthProperty));
+                Storyboard.SetTarget(heightAnim, NavIndicator);
+                Storyboard.SetTargetProperty(heightAnim, new System.Windows.PropertyPath(FrameworkElement.HeightProperty));
 
                 var sb = new Storyboard();
                 sb.Children.Add(marginAnim);
-                sb.Children.Add(widthAnim);
+                sb.Children.Add(heightAnim);
                 sb.Begin();
             }
             else
             {
-                NavIndicator.Margin = new Thickness(left, 0, 0, 0);
-                NavIndicator.Width = width;
+                NavIndicator.Margin = new Thickness(0, top, 0, 0);
+                NavIndicator.Height = height;
             }
         }
 
@@ -254,7 +243,7 @@ namespace RLSHub.Wpf
             if (animate)
             {
                 page.Opacity = 0;
-                page.RenderTransform = new System.Windows.Media.TranslateTransform(24, 0);
+                page.RenderTransform = new TranslateTransform(0, 20);
                 page.RenderTransformOrigin = new Point(0, 0);
                 page.Loaded += OnPageLoaded;
             }
@@ -267,7 +256,6 @@ namespace RLSHub.Wpf
                 return;
             page.Loaded -= OnPageLoaded;
 
-            // Update sliding underline after new content has laid out (fixes shift/glitch)
             if (_pendingIndicatorButton != null)
             {
                 var btn = _pendingIndicatorButton;
@@ -277,17 +265,17 @@ namespace RLSHub.Wpf
 
             var opacityAnim = new DoubleAnimation(0, 1, TransitionDuration)
             {
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
-            var translateAnim = new DoubleAnimation(24, 0, TransitionDuration)
+            var translateAnim = new DoubleAnimation(20, 0, TransitionDuration)
             {
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
 
             Storyboard.SetTarget(opacityAnim, page);
             Storyboard.SetTargetProperty(opacityAnim, new System.Windows.PropertyPath(UIElement.OpacityProperty));
             Storyboard.SetTarget(translateAnim, page);
-            Storyboard.SetTargetProperty(translateAnim, new System.Windows.PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
+            Storyboard.SetTargetProperty(translateAnim, new System.Windows.PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
 
             var sb = new Storyboard();
             sb.Children.Add(opacityAnim);
@@ -308,11 +296,11 @@ namespace RLSHub.Wpf
                     HeaderSubtitle.Text = "Release tracking and patch notes.";
                     break;
                 case "settings":
-                    HeaderTitle.Text = "Settings Manager";
+                    HeaderTitle.Text = "Settings";
                     HeaderSubtitle.Text = "Tune the overhaul to your playstyle.";
                     break;
                 case "about":
-                    HeaderTitle.Text = "About RLS Hub";
+                    HeaderTitle.Text = "About";
                     HeaderSubtitle.Text = "Companion app for RLS Career Overhaul.";
                     break;
                 default:

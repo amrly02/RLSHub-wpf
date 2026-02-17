@@ -2,11 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="Transparent">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="36,16,36,32">
         <StackPanel>
-            <TextBlock Text="About" Style="{StaticResource SectionHeaderTextStyle}" Margin="0,0,0,6"/>
-            <TextBlock Text="Support the team, join the community, or explore the code." Style="{StaticResource HeroSubtitleTextStyle}" Margin="0,0,0,20"/>
-
+            <!-- Two-column glass cards -->
             <Grid Margin="0,0,0,24">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -14,24 +12,50 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource TileCardStyle}" MinHeight="240" Padding="24">
+                <!-- Community card -->
+                <Border Grid.Column="0" Style="{StaticResource TileCardStaticStyle}" MinHeight="240" Padding="24" Opacity="0">
+                    <Border.RenderTransform><TranslateTransform Y="16"/></Border.RenderTransform>
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="16" To="0" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
                     <StackPanel>
+                        <TextBlock Text="&#xE716;" FontFamily="Segoe MDL2 Assets" FontSize="28" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
                         <TextBlock Text="Community" Style="{StaticResource CardTitleTextStyle}"/>
                         <TextBlock Text="Support on Patreon, chat on Discord" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,6,0,0"/>
-                        <StackPanel Margin="0,14,0,0">
-                            <Button Content="Raceless-RLS · Patreon" Style="{StaticResource GhostButtonStyle}" Click="OpenRacelessPatreon_Click" Margin="0,0,0,10"/>
-                            <Button Content="RLS Vehicle Labs · Patreon" Style="{StaticResource GhostButtonStyle}" Click="OpenVehicleLabsPatreon_Click" Margin="0,0,0,10"/>
-                            <Button Content="Raceless-RLS Career · Discord" Style="{StaticResource GhostButtonStyle}" Click="OpenDiscord_Click"/>
+                        <StackPanel Margin="0,18,0,0">
+                            <Button Content="Raceless-RLS · Patreon" Style="{StaticResource GhostButtonStyle}" Click="OpenRacelessPatreon_Click" Margin="0,0,0,10" HorizontalAlignment="Left"/>
+                            <Button Content="RLS Vehicle Labs · Patreon" Style="{StaticResource GhostButtonStyle}" Click="OpenVehicleLabsPatreon_Click" Margin="0,0,0,10" HorizontalAlignment="Left"/>
+                            <Button Content="Raceless-RLS Career · Discord" Style="{StaticResource GhostButtonStyle}" Click="OpenDiscord_Click" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="2" Style="{StaticResource TileCardStyle}" MinHeight="240" Padding="24">
+                <!-- Code & Releases card -->
+                <Border Grid.Column="2" Style="{StaticResource TileCardStaticStyle}" MinHeight="240" Padding="24" Opacity="0">
+                    <Border.RenderTransform><TranslateTransform Y="16"/></Border.RenderTransform>
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" BeginTime="0:0:0.08" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="16" To="0" BeginTime="0:0:0.08" Duration="0:0:0.4" EasingFunction="{StaticResource EaseOut}"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
                     <StackPanel>
+                        <TextBlock Text="&#xE943;" FontFamily="Segoe MDL2 Assets" FontSize="28" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
                         <TextBlock Text="Code &amp; Releases" Style="{StaticResource CardTitleTextStyle}"/>
                         <TextBlock Text="RLS-Modding on GitHub" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,6,0,0"/>
-                        <StackPanel Margin="0,14,0,0">
-                            <Button Content="RLS-Modding" Style="{StaticResource GhostButtonStyle}" Click="OpenGitHub_Click"/>
+                        <StackPanel Margin="0,18,0,0">
+                            <Button Content="RLS-Modding" Style="{StaticResource GhostButtonStyle}" Click="OpenGitHub_Click" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>

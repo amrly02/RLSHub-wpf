@@ -18,5 +18,6 @@ namespace RLSHub.Wpf.Models
         public string SellerDisplay { get; set; } = string.Empty;
         public string ModelDisplay { get; set; } = string.Empty;
         public string YearDisplay { get; set; } = string.Empty;
+        public string MileageDisplay { get; set; } = string.Empty;
     }
 }

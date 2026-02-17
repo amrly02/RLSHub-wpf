@@ -55,7 +55,8 @@ namespace RLSHub.Wpf.Services
                         PriceDisplay = priceDisplay,
                         SellerDisplay = seller,
                         ModelDisplay = model,
-                        YearDisplay = yearDisplay
+                        YearDisplay = yearDisplay,
+                        MileageDisplay = (listing.Mileage ?? 0).ToString("N0")
                     });
                 }
                 return (result, null);

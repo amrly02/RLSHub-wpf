@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <RootNamespace>RLSHub.Wpf</RootNamespace>
     <AssemblyName>RLSHub.Wpf</AssemblyName>
-    <Version>0.6</Version>
-    <AssemblyVersion>0.6.0.0</AssemblyVersion>
+    <Version>0.7</Version>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Assets\**" CopyToOutputDirectory="PreserveNewest" Link="Assets\%(RecursiveDir)%(Filename)%(Extension)" />

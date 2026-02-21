@@ -50,8 +50,14 @@ namespace RLSHub.Wpf.Services
                         VehicleModel = model,
                         VehicleYear = listing.VehicleYear,
                         Mileage = listing.Mileage ?? 0,
+                        Condition = listing.Condition,
                         Status = listing.Status ?? string.Empty,
                         CreatedAtUtc = listing.CreatedAt,
+                        ThumbnailBase64 = listing.ThumbnailBase64,
+                        ThumbnailBase64Full = listing.ThumbnailBase64Full,
+                        Thumbnail2Base64 = listing.Thumbnail2Base64,
+                        Thumbnail3Base64 = listing.Thumbnail3Base64,
+                        Thumbnail4Base64 = listing.Thumbnail4Base64,
                         PriceDisplay = priceDisplay,
                         SellerDisplay = seller,
                         ModelDisplay = model,
@@ -123,8 +129,14 @@ namespace RLSHub.Wpf.Services
             [JsonPropertyName("vehicle_model")] public string? VehicleModel { get; set; }
             [JsonPropertyName("vehicle_year")] public int? VehicleYear { get; set; }
             [JsonPropertyName("mileage")] public long? Mileage { get; set; }
+            [JsonPropertyName("condition")] public int? Condition { get; set; }
             [JsonPropertyName("status")] public string? Status { get; set; }
             [JsonPropertyName("created_at")] public DateTime? CreatedAt { get; set; }
+            [JsonPropertyName("thumbnail_base64")] public string? ThumbnailBase64 { get; set; }
+            [JsonPropertyName("thumbnail_base64_full")] public string? ThumbnailBase64Full { get; set; }
+            [JsonPropertyName("thumbnail_2_base64")] public string? Thumbnail2Base64 { get; set; }
+            [JsonPropertyName("thumbnail_3_base64")] public string? Thumbnail3Base64 { get; set; }
+            [JsonPropertyName("thumbnail_4_base64")] public string? Thumbnail4Base64 { get; set; }
         }
     }
 }

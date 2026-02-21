@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:models="clr-namespace:RLSHub.Wpf.Models"
              Background="Transparent">
+    <Grid>
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="36,16,36,32">
         <StackPanel>
             <!-- Bridge status card -->
@@ -98,15 +99,15 @@
             </Border>
 
             <!-- Listing cards with entrance animation -->
-            <ItemsControl x:Name="ListingsItems">
+            <ItemsControl x:Name="ListingsItems" SizeChanged="ListingsItems_SizeChanged">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel/>
+                        <UniformGrid Columns="{Binding GridColumns, RelativeSource={RelativeSource AncestorType=UserControl}}" VerticalAlignment="Top"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:CarSwapDisplayItem}">
-                        <Border Width="320" MinHeight="140" Margin="0,0,12,12" Opacity="0">
+                        <Border MinHeight="140" Margin="0,0,12,12" Opacity="0">
                             <Border.RenderTransform><TranslateTransform Y="14"/></Border.RenderTransform>
                             <Border.Triggers>
                                 <EventTrigger RoutedEvent="Loaded">
@@ -118,8 +119,14 @@
                                     </BeginStoryboard>
                                 </EventTrigger>
                             </Border.Triggers>
-                            <Border Style="{StaticResource TileCardStyle}" Width="320" MinHeight="140">
+                            <Border Style="{StaticResource TileCardStyle}" MinHeight="140" MouseLeftButtonUp="ListingCard_Click" Cursor="Hand">
                             <StackPanel>
+                                <Border Height="160" Margin="-20,-20,-20,12" CornerRadius="16,16,0,0" Background="#1A1A1A" ClipToBounds="True">
+                                    <Grid>
+                                        <TextBlock Text="🚗" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.3"/>
+                                        <Image Source="{Binding ThumbnailImage}" Stretch="UniformToFill" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    </Grid>
+                                </Border>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -129,10 +136,13 @@
                                     <Button Grid.Column="1" Padding="4" Margin="0,-4,0,0" Click="ToggleWatchlist_Click" Tag="{Binding}" ToolTip="Toggle watchlist">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource GhostButtonStyle}">
-                                                <Setter Property="Content" Value="☆"/>
+                                                <Setter Property="Content" Value="&#xE734;"/>
+                                                <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+                                                <Setter Property="FontSize" Value="16"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                                        <Setter Property="Content" Value="★"/>
+                                                        <Setter Property="Content" Value="&#xE735;"/>
+                                                        <Setter Property="Foreground" Value="{StaticResource AccentSoftBrush}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -168,4 +178,84 @@
             </ItemsControl>
         </StackPanel>
     </ScrollViewer>
+
+    <!-- Modal Overlay -->
+    <Grid x:Name="ModalOverlay" Visibility="Collapsed" Background="#B2000000" MouseLeftButtonDown="ModalOverlay_Click">
+        <Border x:Name="ModalContentBorder" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource SurfaceBorderBrush}" BorderThickness="1" CornerRadius="16" Width="600" MaxHeight="700" VerticalAlignment="Center" HorizontalAlignment="Center" MouseLeftButtonDown="ModalContent_Click" RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+            </Border.RenderTransform>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Close Button -->
+                <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16" Padding="8" Style="{StaticResource GhostButtonStyle}" Click="CloseModal_Click" Panel.ZIndex="1"/>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24">
+                    <StackPanel>
+                        <!-- Image -->
+                        <Border Height="300" CornerRadius="8" Background="#1A1A1A" ClipToBounds="True" Margin="0,0,0,20">
+                            <Grid>
+                                <TextBlock Text="🚗" FontSize="72" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.3"/>
+                                <Image x:Name="ModalImage" Stretch="UniformToFill" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                
+                                <!-- Photo Navigation Arrows -->
+                                <Button x:Name="PrevPhotoButton" Content="&#xE76B;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0" Padding="12,8" FontSize="16" Style="{StaticResource GhostButtonStyle}" Background="#B2000000" Foreground="White" Click="PrevPhoto_Click" Visibility="Collapsed"/>
+                                <Button x:Name="NextPhotoButton" Content="&#xE76C;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Padding="12,8" FontSize="16" Style="{StaticResource GhostButtonStyle}" Background="#B2000000" Foreground="White" Click="NextPhoto_Click" Visibility="Collapsed"/>
+                                
+                                <!-- Photo Counter -->
+                                <Border x:Name="PhotoCounterBorder" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,12" Background="#B2000000" CornerRadius="12" Padding="8,4" Visibility="Collapsed">
+                                    <TextBlock x:Name="PhotoCounterText" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Title & Price -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="ModalTitle" Style="{StaticResource CardTitleTextStyle}" FontSize="24" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="ModalPrice" Grid.Column="1" Style="{StaticResource CardTitleTextStyle}" FontSize="24" Foreground="{StaticResource AccentSoftBrush}" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Details Grid -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Year:" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,16,8"/>
+                            <TextBlock x:Name="ModalYear" Grid.Row="0" Grid.Column="1" Style="{StaticResource CardTitleTextStyle}" FontSize="14" Margin="0,0,0,8"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Mileage:" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,16,8"/>
+                            <TextBlock x:Name="ModalMileage" Grid.Row="1" Grid.Column="1" Style="{StaticResource CardTitleTextStyle}" FontSize="14" Margin="0,0,0,8"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Condition:" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,16,8"/>
+                            <TextBlock x:Name="ModalCondition" Grid.Row="2" Grid.Column="1" Style="{StaticResource CardTitleTextStyle}" FontSize="14" Margin="0,0,0,8"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Seller:" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,16,8"/>
+                            <TextBlock x:Name="ModalSeller" Grid.Row="3" Grid.Column="1" Style="{StaticResource CardTitleTextStyle}" FontSize="14" Margin="0,0,0,8"/>
+                        </Grid>
+
+                        <!-- Description -->
+                        <TextBlock Text="Description" Style="{StaticResource CardSubtitleTextStyle}" Margin="0,0,0,8"/>
+                        <TextBlock x:Name="ModalDescription" Style="{StaticResource CardTitleTextStyle}" FontSize="14" TextWrapping="Wrap" Opacity="0.8"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+    </Grid>
 </UserControl>

@@ -40,12 +40,30 @@ namespace RLSHub.Wpf.Views
         private DispatcherTimer? _bridgeStatusTimer;
         private bool _bridgeOutputExpanded;
 
+        public static readonly DependencyProperty GridColumnsProperty =
+            DependencyProperty.Register("GridColumns", typeof(int), typeof(CarSwapPage), new PropertyMetadata(1));
+
+        public int GridColumns
+        {
+            get { return (int)GetValue(GridColumnsProperty); }
+            set { SetValue(GridColumnsProperty, value); }
+        }
+
         public CarSwapPage()
         {
             InitializeComponent();
             ListingsItems.ItemsSource = _displayItems;
             Loaded += CarSwapPage_Loaded;
             Unloaded += CarSwapPage_Unloaded;
+        }
+
+        private void ListingsItems_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            double availableWidth = e.NewSize.Width;
+            double minCardWidth = 320;
+            int columns = (int)(availableWidth / minCardWidth);
+            if (columns < 1) columns = 1;
+            GridColumns = columns;
         }
 
         private void CarSwapPage_Unloaded(object sender, RoutedEventArgs e)
@@ -355,6 +373,124 @@ namespace RLSHub.Wpf.Views
             {
                 MessageBox.Show(ex.Message, "Update bridge failed", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private CarSwapDisplayItem? _currentModalItem;
+        private int _currentPhotoIndex;
+
+        private void ListingCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is CarSwapDisplayItem item)
+            {
+                _currentModalItem = item;
+                _currentPhotoIndex = 0;
+
+                ModalTitle.Text = item.Listing.Title;
+                ModalPrice.Text = item.Listing.PriceDisplay;
+                ModalYear.Text = item.Listing.YearDisplay;
+                ModalMileage.Text = item.Listing.MileageDisplay;
+                ModalCondition.Text = item.Listing.Condition.HasValue ? $"{item.Listing.Condition}%" : "N/A";
+                ModalSeller.Text = item.Listing.SellerDisplay;
+                ModalDescription.Text = item.Listing.Description;
+                
+                UpdateModalPhoto();
+
+                ModalOverlay.Visibility = Visibility.Visible;
+                ModalOverlay.Opacity = 0;
+                var fadeIn = new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromSeconds(0.2));
+                ModalOverlay.BeginAnimation(OpacityProperty, fadeIn);
+
+                var scaleTransform = (ScaleTransform)ModalContentBorder.RenderTransform;
+                var scaleIn = new System.Windows.Media.Animation.DoubleAnimation(0.9, 1, TimeSpan.FromSeconds(0.2))
+                {
+                    EasingFunction = new System.Windows.Media.Animation.BackEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut, Amplitude = 0.3 }
+                };
+                scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleIn);
+                scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleIn);
+            }
+        }
+
+        private void UpdateModalPhoto()
+        {
+            if (_currentModalItem == null) return;
+
+            var images = _currentModalItem.AllImages;
+            if (images.Count > 0)
+            {
+                ModalImage.Source = images[_currentPhotoIndex];
+                
+                if (images.Count > 1)
+                {
+                    PrevPhotoButton.Visibility = Visibility.Visible;
+                    NextPhotoButton.Visibility = Visibility.Visible;
+                    PhotoCounterBorder.Visibility = Visibility.Visible;
+                    PhotoCounterText.Text = $"{_currentPhotoIndex + 1} / {images.Count}";
+                }
+                else
+                {
+                    PrevPhotoButton.Visibility = Visibility.Collapsed;
+                    NextPhotoButton.Visibility = Visibility.Collapsed;
+                    PhotoCounterBorder.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                ModalImage.Source = null;
+                PrevPhotoButton.Visibility = Visibility.Collapsed;
+                NextPhotoButton.Visibility = Visibility.Collapsed;
+                PhotoCounterBorder.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void PrevPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentModalItem == null || _currentModalItem.AllImages.Count <= 1) return;
+            
+            _currentPhotoIndex--;
+            if (_currentPhotoIndex < 0)
+            {
+                _currentPhotoIndex = _currentModalItem.AllImages.Count - 1;
+            }
+            UpdateModalPhoto();
+        }
+
+        private void NextPhoto_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentModalItem == null || _currentModalItem.AllImages.Count <= 1) return;
+            
+            _currentPhotoIndex++;
+            if (_currentPhotoIndex >= _currentModalItem.AllImages.Count)
+            {
+                _currentPhotoIndex = 0;
+            }
+            UpdateModalPhoto();
+        }
+
+        private void CloseModal()
+        {
+            var fadeOut = new System.Windows.Media.Animation.DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.15));
+            fadeOut.Completed += (s, e) => ModalOverlay.Visibility = Visibility.Collapsed;
+            ModalOverlay.BeginAnimation(OpacityProperty, fadeOut);
+
+            var scaleTransform = (ScaleTransform)ModalContentBorder.RenderTransform;
+            var scaleOut = new System.Windows.Media.Animation.DoubleAnimation(1, 0.9, TimeSpan.FromSeconds(0.15));
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleOut);
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleOut);
+        }
+
+        private void CloseModal_Click(object sender, RoutedEventArgs e)
+        {
+            CloseModal();
+        }
+
+        private void ModalOverlay_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            CloseModal();
+        }
+
+        private void ModalContent_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

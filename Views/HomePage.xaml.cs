@@ -99,6 +99,8 @@ namespace RLSHub.Wpf.Views
         {
             var running = IsBeamNgRunning();
             BeamNgStatusText.Text = running ? "BeamNG: Running" : "BeamNG: Not running";
+            if (BeamNgStatusDot != null)
+                BeamNgStatusDot.Fill = (System.Windows.Media.Brush)FindResource(running ? "BridgeRunningBrush" : "BridgeStoppedBrush");
             var prefs = _dashboardPrefs.Load();
             if (prefs.LastLaunchUtc.HasValue)
             {
